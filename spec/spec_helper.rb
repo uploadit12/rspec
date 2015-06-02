@@ -3,6 +3,8 @@ ENV["RAILS_ENV"] ||= 'test'
 require File.expand_path("../../config/environment", __FILE__)
 require 'rspec/rails'
 require 'rspec/autorun'
+require "capybara/rspec"
+require 'database_cleaner'
 
 # Requires supporting ruby files with custom matchers and macros, etc,
 # in spec/support/ and its subdirectories.
@@ -29,7 +31,24 @@ RSpec.configure do |config|
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
   # instead of true.
-  config.use_transactional_fixtures = true
+  config.use_transactional_fixtures = false
+
+  config.before(:suite) do
+    DatabaseCleaner.clean_with(:truncation)
+  end
+
+  config.before(:each) do
+    DatabaseCleaner.strategy = :transaction
+    DatabaseCleaner.start
+  end
+
+  config.before(:each, js: true) do
+    DatabaseCleaner.strategy = :truncation
+  end
+
+  config.after(:each) do
+    DatabaseCleaner.clean
+  end
 
   # If true, the base class of anonymous controllers will be inferred
   # automatically. This will be the default behavior in future versions of
@@ -42,3 +61,40 @@ RSpec.configure do |config|
   #     --seed 1234
   config.order = "random"
 end
+
+# require 'selenium-webdriver'
+
+# module ::Selenium::WebDriver::Firefox
+#   class Bridge
+#     attr_accessor :speed
+
+#     def execute(*args)
+#       result = raw_execute(*args)['value']
+#       case speed
+#         when :slow
+#           sleep 0.5
+#         when :medium
+#           sleep 0.1
+#       end
+#       result
+#     end
+#   end
+# end
+
+# def set_speed(speed)
+#   begin
+#     page.driver.browser.send(:bridge).speed=speed
+#   rescue
+#   end
+# end
+
+
+class ActiveRecord::Base
+  mattr_accessor :shared_connection
+  @@shared_connection = nil
+
+  def self.connection
+    @@shared_connection || retrieve_connection
+  end
+end
+ActiveRecord::Base.shared_connection = ActiveRecord::Base.connection

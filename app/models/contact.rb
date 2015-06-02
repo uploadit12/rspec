@@ -8,6 +8,8 @@ class Contact < ActiveRecord::Base
   scope :search_and_order_by_last_name,
     ->(last_name) { where('last_name LIKE ?', "#{last_name}%").order(:last_name) }
 
+  scope :active, -> { where(blocked: false) }
+
   def full_name
     "#{first_name} #{last_name}"
   end

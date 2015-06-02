@@ -13,7 +13,7 @@ describe ContactsController do
   describe 'GET show' do
     it 'assign requested contact to @contact' do
       contact = create(:contact)
-      get :show, {id: contact}
+      get :show, { id: contact }
       assigns(:contact).should eq contact
     end
   end
@@ -28,7 +28,7 @@ describe ContactsController do
   describe 'GET edit' do
     it 'assign requested contact to @contact' do
       contact = create(:contact)
-      get :show, {id: contact}
+      get :show, { id: contact }
       assigns(:contact).should eq contact
     end
   end
@@ -53,7 +53,7 @@ describe ContactsController do
 
     describe 'invalid params' do
       it 'assigns unsaved Contact to @contact' do
-        post :create, { contact: attributes_for(:contact, first_name: nil)}
+        post :create, { contact: attributes_for(:contact, first_name: nil) }
         assigns(:contact).should be_a(Contact)
         assigns(:contact).should be_new_record
       end
@@ -64,31 +64,35 @@ describe ContactsController do
     end
 
     describe 'PUT update' do
-      before :each do
+      before :all do
         @contact = create(:contact)
       end
 
+      after :all do
+        @contact.destroy
+      end
+
       it 'assigns requested Contact to @contact' do
-        put :update, {id: @contact, contact: attributes_for(:contact)}
+        put :update, { id: @contact, contact: attributes_for(:contact) }
         assigns(:contact).should eq @contact
       end
 
       describe 'valid params' do
         it 'updates existing record' do
-          put :update, {id: @contact, contact: attributes_for(:contact, first_name: 'James')}
+          put :update, { id: @contact, contact: attributes_for(:contact, first_name: 'James') }
           @contact.reload
           @contact.first_name.should eq 'James'
         end
 
         it 'redirects to contact show action' do
-          put :update, {id: @contact, contact: attributes_for(:contact)}
+          put :update, { id: @contact, contact: attributes_for(:contact) }
           response.should redirect_to @contact
         end
       end
 
       describe 'invalid parameters' do
         it 'does not update the requested record' do
-          put :update, {id: @contact, contact: attributes_for(:contact, first_name: 'James Anderson')}
+          put :update, { id: @contact, contact: attributes_for(:contact, first_name: 'James Anderson') }
           @contact.reload
           @contact.first_name.should_not eq 'James Anderson'
         end
@@ -113,6 +117,28 @@ describe ContactsController do
 
       it 'redirects to contact list page' do
         delete :destroy, id: @contact
+        response.should redirect_to(contacts_url)
+      end
+    end
+
+    describe 'PUT block' do
+      before :each do
+        @contact = create(:contact, blocked: false)
+      end
+
+      it 'assigns requested contact to @contact' do
+        put :block, { id: @contact }
+        assigns(:contact).should eq @contact
+      end
+
+      it 'blocks the requested contact' do
+        put :block, { id: @contact }
+        @contact.reload
+        @contact.blocked.should be true
+      end
+
+      it 'redirects to contact list' do
+        put :block, { id: @contact }
         response.should redirect_to(contacts_url)
       end
     end

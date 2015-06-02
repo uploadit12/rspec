@@ -1,10 +1,10 @@
 class ContactsController < ApplicationController
-  before_action :set_contact, only: [:show, :edit, :update, :destroy]
+  before_action :set_contact, only: [:show, :edit, :update, :destroy, :block]
 
   # GET /contacts
   # GET /contacts.json
   def index
-    @contacts = Contact.order(:last_name).all
+    @contacts = Contact.order(:last_name).active
   end
 
   # GET /contacts/1
@@ -56,9 +56,16 @@ class ContactsController < ApplicationController
   def destroy
     @contact.destroy
     respond_to do |format|
-      format.html { redirect_to contacts_url, notice: 'Contact was successfully destroyed.' }
+      format.html {
+        redirect_to contacts_url, notice: 'Contact was successfully destroyed.'
+      }
       format.json { head :no_content }
     end
+  end
+
+  def block
+    @contact.update_attribute(:blocked, true)
+    redirect_to contacts_path, notice: 'Contact was successfully blocked'
   end
 
   private

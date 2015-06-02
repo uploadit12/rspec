@@ -23,6 +23,12 @@ describe Contact do
     build(:contact, email: 'shane@cc.com').should_not be_valid
   end
 
+  it 'returns all un blocked records' do
+    contact1 = create(:contact)
+    contact2 = create(:contact, blocked: true)
+    Contact.active.should eq [contact1]
+  end
+
   describe 'search and order by last name' do
     before :each do
       @jhanson = create(:contact, last_name: 'Jhanson')
